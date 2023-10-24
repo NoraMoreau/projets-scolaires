@@ -1,0 +1,9 @@
+[package]
+name = "abr"
+version = "0.1.0"
+authors = ["Pablo Oliveira <pablo@sifflez.org>", "Stéphane Lopes <stephane.lopes@uvsq.fr"]
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
