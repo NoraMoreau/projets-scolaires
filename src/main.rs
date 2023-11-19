@@ -2,11 +2,14 @@ mod file_tree;
 mod print_tree;
 mod size;
 
+//clap: bibliothèque utilisée pour analyser et valider la chaîne d'arguments de ligne 
+//de commande fournie par l'utilisateur au moment de l'exécution
 use clap::{Parser, Subcommand};
 use file_tree::FileTree;
 use std::path::{Path, PathBuf};
 
-#[derive(Parser)]
+//compilateur génére automatiquement le code d'implémentation de nom du trait pour la structure
+#[derive(Parser)] 
 #[command(author, version, about, long_about = None)]
 #[command(propagate_version = true)]
 struct Cli {

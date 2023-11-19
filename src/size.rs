@@ -60,7 +60,7 @@ mod tests {
     }
 
     #[test]
-    fn test_fmt_1_000() {
+    fn test_fmt_1_000() { //penser à faire les tets avec assert_eq
         let s1 = Size::new(1024);
         println!("Formatted result: {}", s1);
         let s2 = Size::new(4674);
