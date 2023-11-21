@@ -74,19 +74,23 @@ impl FileTree {
 
     }
 
-    pub fn get_children(&self/*, path: &Path */) -> Vec<PathBuf> { //normalement return Option<&[PathBuf]> mais pour l'instant Vec<PathBuf>
-
+    pub fn get_children(&self, path: &Path) -> Vec<PathBuf> { //normalement return Option<&[PathBuf]> mais pour l'instant Vec<PathBuf>
+        
+        let mut vec_path: Vec<PathBuf> = Vec::new();
         //Verifier si on a bien un répertoir et non un fichier 
         if let Ok(_exist_dir) = fs::metadata(&self.root) {
 
+            //Recuperer dans un vecteur les chemins des enfants d'un chemin path
+            if let Ok(children) = fs::read_dir(path) {
+                for x in children {
+                    if let Ok(child) = x {
+                        vec_path.push(child.path());
+                    }
+                }
+            }
+
         } else {
             panic!("Le répertoire n'existe pas, ou ce n'est pas un répertoire ou il y a une erreur lors de l'accès.");
-        }
-
-        let mut vec_path: Vec<PathBuf> = Vec::new();
-        //Recuperer dans un vecteur les chemins des enfants du répertoire
-        for (path, _entry) in self.map.iter() {
-            vec_path.push(path.clone());
         }
 
         return vec_path;
@@ -104,6 +108,7 @@ impl FileTree {
 #[cfg(test)]
 mod tests{
     use super::*; //ne pas oublier d'importer les crate!!!
+
     #[test]
     fn test_read_dir() {
         let chemin = fs::read_dir("src/test");
@@ -162,9 +167,10 @@ mod tests{
     fn test_get_children() {
         let chemin = std::path::Path::new("src/test");
         let tree = FileTree::new(chemin);
+        let chemin2 = std::path::Path::new("src/test/sous_dossier");
         
         if let Ok(tree) = tree {
-            println!("get_children() = {:?}", tree.get_children());
+            println!("get_children() = {:?}", tree.get_children(chemin2));
         }
     }
     
