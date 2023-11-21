@@ -1,5 +1,6 @@
 use std::fmt;
 
+#[derive(Debug)]
 #[derive(PartialEq, PartialOrd, Eq, Ord, Copy, Clone)]
 pub struct Size(u64);
 
