@@ -60,15 +60,15 @@ mod tests {
         assert_eq!(2064, s1.0 + s2.0);
     }
 
-    #[test]
-    fn test_fmt_1_000() { //penser à faire les tets avec assert_eq
+    #[test] //penser à faire les tets avec assert_eq
+    fn test_fmt_1_000() { 
         let s1 = Size::new(1024);
         println!("Formatted result: {}", s1);
         let s2 = Size::new(4674);
         println!("Formatted result: {}", s2);
     }
 
-    #[test]
+    #[test] //penser à faire les tets avec assert_eq
     fn test_fmt_10_000() {
         let s1 = Size::new(11024);
         println!("Formatted result: {}", s1);
@@ -76,7 +76,7 @@ mod tests {
         println!("Formatted result: {}", s2);
     }
 
-    #[test]
+    #[test] //penser à faire les tets avec assert_eq
     fn test_fmt_100_000() {
         let s1 = Size::new(121024);
         println!("Formatted result: {}", s1);
