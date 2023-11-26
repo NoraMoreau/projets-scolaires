@@ -5,8 +5,6 @@ use std::process::exit;
 use std::{fs, vec};
 use std::env;
 
-//TRUCS A RAJOUTER 
-//Faire que si le chemin n'est pas un répertoir ça affiche quand même quelque chose ?
 #[derive(Debug)]
 pub struct FileTree {
     root: PathBuf,

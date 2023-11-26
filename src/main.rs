@@ -13,6 +13,8 @@ use std::path::{Path, PathBuf};
 #[command(author, version, about, long_about = None)]
 #[command(propagate_version = true)]
 struct Cli {
+    #[arg(long = "lexicographic-sort")]
+    lexico: bool,
     #[command(subcommand)]
     command: Commands,
 }
@@ -26,15 +28,23 @@ enum Commands {
     },
 }
 
+//écrire en ldc 
+//cargo run usage "src/test/sous_dossier"
+//cargo run -- --lexicographic-sort usage "src/test/sous_dossier"
 fn main() -> std::io::Result<()> {
     //Crée une instance de Cli
     let cli = Cli::parse();
 
-    //Vérifie que si cli.command a dans Usa
+    //Vérifie le pattern de cli.command pour savoir comment réagir en fonction de la commande passée
     match &cli.command {
-        Commands::Usage { path } => {
+        Commands::Usage {path} => {
             let path = path.as_deref().unwrap_or(Path::new("."));
-            FileTree::new(path)?.show();
+            let mut tree = FileTree::new(path);
+            if cli.lexico == true {
+                tree?.show(true);
+            } else {
+                tree?.show(false);
+            }
         }
     }
     Ok(())
