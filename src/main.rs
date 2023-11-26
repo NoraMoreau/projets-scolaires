@@ -8,7 +8,7 @@ use clap::{Parser, Subcommand};
 use file_tree::FileTree;
 use std::path::{Path, PathBuf};
 
-//compilateur génére automatiquement le code d'implémentation de nom du trait pour la structure
+//Le compilateur génére automatiquement le code d'implémentation du trait pour la structure
 #[derive(Parser)] 
 #[command(author, version, about, long_about = None)]
 #[command(propagate_version = true)]

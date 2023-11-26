@@ -23,9 +23,9 @@ impl FileTree {
     pub fn new(root: &Path) -> std::io::Result<Self> {
         let mut table: HashMap<PathBuf, EntryNode> = HashMap::new();
 
-        if let Ok(entrées) = fs::read_dir(root) { //on récupère les enfants du rep dans entrées grâce à read_dir  
+        if let Ok(entrées) = fs::read_dir(root) { //on récupère les enfants du répertoire dans entrées grâce à read_dir  
             for x in entrées {
-                if let Ok(une_entrée) = x { //desencapsuler x = Result<DirEntry, Error>
+                if let Ok(une_entrée) = x { //desencapsuler x: Result<DirEntry, Error>
 
                     if let Ok(meta) = fs::metadata(une_entrée.path()) { //récupère les metadonées des entrée
                        //Si c'est un dossier récuperer la liste de son contenu, si c'est un fichier récupérer sa taille
@@ -74,7 +74,7 @@ impl FileTree {
     pub fn get_children(&self, path: &Path) -> Vec<PathBuf> { 
         let mut vec_path: Vec<PathBuf> = Vec::new();
 
-        //Verifie que path est bien un chemin se trouvant dans self
+        //Verifie que path est bien un répertoire se trouvant dans self
         if path.starts_with(&self.root) == true {
             if let Ok(meta) = fs::metadata(path) {
                 if meta.is_dir() {
@@ -116,11 +116,11 @@ impl FileTree {
     }
 
     pub fn get_size(&self, path: &Path) -> Option<Size> {
-        //Verifie que path est bien un chemin se trouvant dans self
+        //Verifie que path est bien un répertoire ou un fichier se trouvant dans self
         if path.starts_with(&self.root) == true {
             if let Ok(meta) = fs::metadata(path) {
                 if meta.is_dir() || meta.is_file() {
-                    //println!("Ce chemin se trouve dans l'arbre");
+                    
                 } else {
                     eprintln!("Erreur sur le chemin {:?}, ce chemin n'existe pas ou il y a une erreur d'accés", path);
                     exit(3);
@@ -136,9 +136,12 @@ impl FileTree {
         }
 
         if let Ok(meta) = fs::metadata(path) {
+            //Si on a un répertoire on iter la fonction ppur parcourir tout ce qui s'y trouve
+            //et récupérer leur taille en les sommant au fur et à mesure
             if meta.is_dir() {
                 if let Ok(dir) = fs::read_dir(path) {
                     let mut taille = Size::new(0);
+                    //On entre dans le répertoire et on parcourt les fichiers que l'on envoit à get_size
                     for x in dir {
                         if let Ok(entrée) = x {
                             let s = self.get_size(&entrée.path());
@@ -147,14 +150,12 @@ impl FileTree {
                             }
                         }
                     }
-                    //println!("{:?} taille = {}\n", path, taille);
                     return Some(taille);
                 }
             
             } else {
                 let taille = meta.len(); 
                 let s = Size::new(taille); 
-                //println!("{:?} taille = {}\n", path, s);
                 return Some(s);
             }
             
@@ -167,14 +168,12 @@ impl FileTree {
 
     pub fn files(&self) -> Vec<PathBuf> { 
         let mut vec: Vec<PathBuf> = Vec::new();
-
+        //On parcourt les entrées du répertoire et lorsqu'on a des fichiers on les mets dans le vecteur
         if let Ok(entrées) = fs::read_dir(&self.root) {
             for x in entrées {
                 if let Ok(une_entrée) = x {
                     if let Ok(meta) = fs::metadata(une_entrée.path()) {
-                        if meta.is_dir() {
-
-                        } else {
+                        if meta.is_file() {
                             vec.push(une_entrée.path());
                         }
                     }
@@ -195,32 +194,6 @@ mod tests{
         let chemin = fs::read_dir("src/test");
         println!("Chemin: {:?}", chemin);
         assert!(chemin.is_ok());
-    }
-   
-    #[test]
-    fn test_path_existe() {
-        let chemin = std::path::Path::new("src/test");
-
-        if let Ok(current_dir) = env::current_dir() {
-            println!("Répertoire de travail actuel : {:?}", current_dir);
-        } else {
-            eprintln!("Erreur lors de l'obtention du répertoire de travail actuel");
-        }
-
-
-        if let Ok(exist_dir) = fs::metadata(chemin) {
-            //Le test passe si on se trouve ici, mais si nous somme dans le else il échoue
-            if exist_dir.is_dir() {
-                println!("Le répertoire existe.");
-            } else {
-                println!("C'est un fichier, le programme nécessite un répertoire.");
-            }
-            
-        } else {
-            println!("Le répertoire n'existe pas ou il y a une erreur lors de l'accès.");
-            // Fait échouer le test si le répertoire n'existe pas ou s'il y a une erreur
-            assert!(false, "Le répertoire n'existe pas ou il y a une erreur lors de l'accès.");
-        }
     }
 
     #[test]
@@ -250,7 +223,7 @@ mod tests{
         }
     }
 
-    #[test] //penser à faire les tets avec assert_eq
+    #[test]
     fn test_get_children() {
         let chemin = std::path::Path::new("src/test");
         let tree = FileTree::new(chemin);
@@ -261,7 +234,7 @@ mod tests{
         }
     }
 
-    #[test] //penser à faire les tets avec assert_eq
+    #[test]
     fn test_get_size() {
         let chemin = std::path::Path::new("src/test");
         let tree = FileTree::new(chemin);
@@ -271,11 +244,10 @@ mod tests{
             if let Some(taille) = tree.get_size(chemin2) {
                 println!("get_size() = {}", taille);
             }
-            //assert_eq!(tree.get_size(chemin2), Some(Size(6156)));
         }
     }
 
-    #[test] //penser à faire les tets avec assert_eq
+    #[test]
     fn test_files() { 
         let chemin = std::path::Path::new("src/test");
         let tree = FileTree::new(chemin);
