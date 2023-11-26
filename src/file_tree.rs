@@ -78,9 +78,21 @@ impl FileTree {
 
         //Verifie que path est bien un chemin se trouvant dans self
         if path.starts_with(&self.root) == true {
-            println!("Ce chemin se trouve dans l'arbre");
+            if let Ok(meta) = fs::metadata(path) {
+                if meta.is_dir() {
+
+                } else {
+                    eprintln!("Erreur sur le chemin {:?}, ce chemin n'existe pas ou il y a une erreur d'accés", path);
+                    exit(3);
+                }
+            } else {
+                eprintln!("Erreur sur le chemin {:?}, ce chemin n'existe pas ou il y a une erreur d'accés", path);
+                exit(2);
+            }
+
         } else {
             eprintln!("Erreur sur le chemin {:?}, ce chemin n'existe pas ou il y a une erreur d'accés", path);
+            exit(1);
         }
 
         //Verifier si on a bien un répertoire et non un fichier 
@@ -137,14 +149,14 @@ impl FileTree {
                             }
                         }
                     }
-                    println!("{:?} taille = {:?}\n", path, taille);
+                    //println!("{:?} taille = {}\n", path, taille);
                     return Some(taille);
                 }
             
             } else {
                 let taille = meta.len(); 
                 let s = Size::new(taille); 
-                println!("{:?} taille = {:?}\n", path, s);
+                //println!("{:?} taille = {}\n", path, s);
                 return Some(s);
             }
             
@@ -174,7 +186,6 @@ impl FileTree {
 
         return vec;
     }
-
 }
 
 #[cfg(test)]
@@ -216,7 +227,7 @@ mod tests{
 
     #[test]
     fn test_path() {
-        let chemin = std::path::Path::new("src/test/sous_dossier"); //"src/test/test_edt" à faire aussi 
+        let chemin = std::path::Path::new("src/test/sous_dossier");
         let tree = FileTree::new(chemin);
 
         //Verifie juste par l'affichage que l'arbre corresponde bien à ce qu'on a dans le répertoire test
@@ -259,7 +270,9 @@ mod tests{
         let chemin2 = std::path::Path::new("src/test/sous_dossier"); //"src/test/azerty" "src/test2/tsur" "src/test/test_edt"
         
         if let Ok(tree) = tree {
-            println!("get_size() = {:?}", tree.get_size(chemin2));
+            if let Some(taille) = tree.get_size(chemin2) {
+                println!("get_size() = {}", taille);
+            }
             //assert_eq!(tree.get_size(chemin2), Some(Size(6156)));
         }
     }
@@ -273,5 +286,4 @@ mod tests{
             println!("files() = {:?}", tree.files());
         }
     }
-
 }

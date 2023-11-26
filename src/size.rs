@@ -14,7 +14,11 @@ impl fmt::Display for Size {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         
         let valeur: f64;
-        if self.0 > 999 && self.0 < 10000 {
+        if self.0 < 1000 {
+            valeur = self.0 as f64;
+            return write!(f, "{:.1}octets", valeur); // :.1 met un seul chiffre après la virgule
+
+        } else if self.0 > 999 && self.0 < 10000 {
             valeur = self.0 as f64 / 1000.0;
             return write!(f, "{:.1}KB", valeur); // :.1 met un seul chiffre après la virgule
 
