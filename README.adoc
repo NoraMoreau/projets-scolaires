@@ -1,0 +1,169 @@
+= Exercices choisis 
+Stéphane Lopes <stephane.lopes@uvsq.fr>, Pablo de Oliveira Castro <pablo.oliveira@uvsq.fr>
+v2022-2023
+:icons: font
+:experimental:
+
+L'objectif de ce TP est de se familiariser avec le type `std::Vec` et manipuler des types structure et énumération.
+Pour cela nous vous proposons trois exercices de difficulté croissante.
+
+== Organisation des sources et tests
+
+Un squelette de départ est fourni pour chaque exercice dans le répertoire `src`:
+....
+src/
+├── exercice1.rs
+├── exercice2.rs
+├── exercice3.rs
+└── lib.rs
+....
+
+Observez que le fichier source principal `lib.rs` importe les trois autres fichiers en tant que sous-modules:
+[source, rust]
+----
+pub mod exercice1;
+pub mod exercice2;
+pub mod exercice3;
+----
+
+Chacun des modules d'exercice comporte des tests unitaires pour vérifier votre travail. Vous pouvez exécuter tous les tests avec la commande `$ cargo test` ou exécuter les tests d'un sous-module spécifique, par exemple `exercice1`, avec `$cargo test exercice1`.
+
+== Exercice 1: Bibliothèque musicale
+
+Nous déclarons une structure `Song` qui représente un morceau de musique avec une note et un titre.
+
+[source, rust]
+----
+struct Song {
+    rank: u32,
+    title: String,
+}
+----
+
+Plus la note `rank` est élevée, plus l'utilisateur aime ce morceau.
+Nous pouvons ainsi représenter une collection musicale,
+
+
+[source, rust]
+----
+let songs : Vec<Song> = vec![
+     Song {
+         rank: 4,
+         title: String::from("Stairway to Heaven"),
+     },
+     Song {
+         rank: 2,
+         title: String::from("Never Gonna Give You Up"),
+     },
+     Song {
+         rank: 5,
+         title: String::from("Nigerian Marketplace"),
+     },
+    ]
+----
+
+. Implémentez la fonction `pub fn average_rank(songs: &Vec<Song>) -> f64` qui retourne la note moyenne pour le vecteur de morceaux passé en argument.
++
+NOTE: Pour convertir un entier `n: u32` en flottant double-précision vous pouvez utiliser la notation `(n as f64)`.
++
+. Implémentez la fonction `pub fn filter_songs(songs: Vec<Song>, rank_min: u32) -> Vec<Song>`. Cette fonction filtre le vecteur `songs` et retourne uniquement les morceaux dont la note est strictement supérieure à `rank_min`.
++
+. Enfin, implémentez la fonction `pub fn good_songs(songs: Vec<Song>) -> Vec<Song>`, qui filtre le vecteur `songs` et ne conserve que les morceaux dont la note est strictement supérieure à la moyenne des notes.
+
+CAUTION: Lorsque vous itérez sur une référence (`&Vec<Songs>`) à un vecteur, `for s in &songs {}`, alors `s` est de type `&Song`. Au contraire, si vous itérez sur un vecteur (`Vec<Songs>`) directement , `for s in songs {}`, alors `s` est de type `Song`.
+
+== Exercice 2 : Crible d'Ératosthène
+
+Dans cet exercice nous allons implémenter le crible d'Ératosthène.
+Pour cela nous allons écrire la fonction `pub fn sieve(n: u32) -> Vec<u32>` qui
+retourne un vecteur contenant les nombres premiers inférieurs ou égaux à `n`.
+
+Pour vous rafraichir la mémoire vous pouvez consulter https://fr.wikipedia.org/wiki/Crible_d%27%C3%89ratosth%C3%A8ne[l'article wikipedia] qui fait une très bonne description de l'algorithme et l'accompagne d'une animation.
+
+NOTE: Pour itérer sur des intervalles entiers la notation `range` est très utile. Par exemple `for i in 1..100` itère sur les nombres entiers allant de 1 à 99 et `for i in 1..=100` itère sur les nombres entiers allant de 1 à 100 (inclus).
+Il est également possible d'utiliser un pas d'itération différent de 1 avec la méthode https://doc.rust-lang.org/std/iter/trait.Iterator.html#examples-6[`step_by()`]. Par exemple, `for i in 1..=100.step_by(3)` itère de 1 à 100 par pas de 3.
+
+== Exercice 3 : Calculatrice en notation polonaise inversée
+
+La https://fr.wikipedia.org/wiki/Notation_polonaise_inverse[notation polonaise inverse (NPI)] permets d'écrire des expressions arithmétiques de manière post-fixe sans utiliser de parenthèses.
+
+Par exemple l'expression `(3 - 5) * 2` peut s'écrire `3 5 - 2 *` en NPI.
+
+Pour évaluer une expression NPI on utilise une pile annexe.
+L'expression se lit de gauche à droite. Lorsque l'on lit un nombre, on l'empile.
+Lorsque l'on lit un opérateur arithmétique on dépile les deux nombres en haut de la pile, puis nous leur appliquons l'opérateur; enfin on empile le résultat. 
+
+À la fin de l'évaluation complète de l'expression NPI le résultat se trouve en haut de la pile.
+
+Par exemple si on évalue `3 5 - 2 *` en NPI on réalisera les étapes suivantes:
+
+. Nous lisons le nombre `3` et l'empilons.
+. Nous lisons le nombre `5` et l'empilons.
+. Nous lisons l'opérateur `-`:
+   - Nous dépilons 5 et 3.
+   - Nous appliquons l'opérateur `(3-5) = -2`. 
+   - Nous empilons le résultat `-2`.
+. Nous lisons le nombre `2` et l'empilons.
+. Nous lisons l'opérateur `*`:
+   - Nous dépilons 2 et -2.
+   - Nous appliquons l'opérateur `(-2 * 2) = -4`. 
+   - Nous empilons le résultat `-4`.
+. Nous arrivons à la fin de l'expression, pour connaître sa valeur nous retournons la valeur en haut de pile, c'est à dire `-4`.
+
+Nous souhaitons implémenter une fonction rust qui permette d'évaluer une expression NPI. Nous définissons les énumérations suivantes:
+
+[source, rust]
+----
+#[derive(Debug)]
+pub enum Operator {
+    Plus,
+    Minus,
+    Times,
+    Divide,
+}
+
+#[derive(Debug)]
+pub enum Token {
+    Number(i32),
+    Op(Operator),
+}
+----
+
+- `Operator` représente les quatre opérateurs arithmétiques classiques (+, -, *, /). L'opérateur / fera la division euclidienne sur les entiers.
+- `Token` représente un mot de l'expression NPI: soit un nombre `Number(i32)` soit un opérateur `Op(Operator)`.
+
+En utilisant ces deux types, il est possible d'écrire l'expression précédente sous la forme d'un tableau rust:
+[source, rust]
+----
+[Token::Number(3),
+ Token::Number(5),
+ Token::Op(Operator::Minus),
+ Token::Number(2),
+ Token::Op(Operator::Times)]
+----
+
+Lors de l'évaluation d'une expression NPI, deux types d'erreurs peuvent se produire. La première erreur concerne les divisions par la valeur zéro qui ne sont pas définies. La deuxième erreur concerne l'absence de valeurs à dépiler. Si par exemple nous évaluons l'expression NPI `5 +`, l'opérateur + ne pourra pas dépiler deux opérandes car il y a une seule valeur sur la pile. 
+
+Pour représenter les deux erreurs nous utilisons le type énumération suivant :
+[source, rust]
+----
+#[derive(Debug, PartialEq)]
+pub enum ComputeError {
+    DivisionByZero,
+    EmptyStack,
+}
+----
+
+
+. Implémentez maintenant la fonction `pub fn compute(input: &[Token]) -> Result<i32, ComputeError>`. Celle-ci retourne un objet `Result` qui contient la valeur `Ok(i32)` lorsque l'expression a été correctement évaluée. En cas d'erreur un objet `Err(ComputeError)` est retourné. 
+
+TIP: La méthode https://doc.rust-lang.org/std/primitive.u32.html#method.checked_div[`u32::checked_div()`] peut être utile pour détecter une division par zéro. La méthode  https://doc.rust-lang.org/std/option/enum.Option.html#method.ok_or[`Option::ok_or()`] est très utile pour lever une erreur lorsqu'un objet `Option` vaut `None`. 
+
+
+## Pour aller plus loin (optionnel)
+
+CAUTION: Cette partie fait appel à des connaissances que nous n'avons pas encore introduites en cours.
+
+Dans l'exercice 1, la fonction `pub fn filter_songs(songs: Vec<Song>, rank_min: u32) -> Vec<Song>` consomme le tableau en entrée. En effet une référence n'est pas utilisée donc le tableau est _déplacé_ dans la fonction qui en devient la propriétaire. 
+
+Modifiez le programme de manière à pouvoir passer le vecteur en entrée par référence. Vous devriez donc avoir la signature `pub fn filter_songs(songs: &Vec<Song>, rank_min: u32) -> Vec<Song>`.
